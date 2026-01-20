@@ -4,12 +4,13 @@ import { Link, Tabs } from "expo-router";
 import { Pressable } from "react-native";
 import Colors from "@/constants/StyleVariables";
 import { useColorScheme } from "react-native";
+import Octicons from "@expo/vector-icons/Octicons";
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>["name"];
   color: string;
 }) {
-  return <FontAwesome size={26} style={{ marginBottom: -2 }} {...props} />;
+  return <FontAwesome size={26} style={{ marginBottom: -20 }} {...props} />;
 }
 
 export default function TabsLayout() {
@@ -23,36 +24,38 @@ export default function TabsLayout() {
         headerTintColor: theme.text,
         tabBarStyle: { backgroundColor: theme.bgDark },
         tabBarActiveTintColor: theme.primary,
-        tabBarInactiveTintColor: theme.borderMuted,
+        tabBarInactiveTintColor: `${theme.primary}40`,
         tabBarLabelStyle: { fontSize: 12, fontWeight: "600" },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
-          headerRight: () => (
-            <Link href="/(auth)/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={22}
-                    color={theme.text}
-                    style={{ marginRight: 14, opacity: pressed ? 0.6 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
+          title: "",
+          tabBarIcon: ({ color }) => (
+            <Octicons
+              name="calendar"
+              size={24}
+              style={{ marginBottom: -12 }}
+              color={color}
+            />
           ),
+          headerShown: false,
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="settings"
         options={{
-          title: "Second",
-          tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
+          title: "",
+          tabBarIcon: ({ color }) => (
+            <Octicons
+              name="gear"
+              size={24}
+              style={{ marginBottom: -12 }}
+              color={color}
+            />
+          ),
+          headerShown: false,
         }}
       />
     </Tabs>

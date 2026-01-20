@@ -10,10 +10,10 @@ export default {
     borderMuted: "#ababab",
     primary: "#0c3cd4",
     secondary: "#006370",
-    danger: "#8a6c6a",
-    warning: "#7b754d",
-    success: "#547c6e",
-    info: "#5a7894",
+    danger: "#a6192e",
+    warning: "#ff9900",
+    success: "#04b34f",
+    info: "#0057b8",
   },
 
   dark: {
@@ -41,12 +41,17 @@ export default {
     borderMuted: "#ababab",
     primary: "#0c3cd4",
     secondary: "#006370",
-    danger: "#8a6c6a",
-    warning: "#7b754d",
-    success: "#547c6e",
-    info: "#5a7894",
+    danger: "#a6192e",
+    warning: "#ff9900",
+    success: "#04b34f",
+    info: "#0057b8",
   },
 
-  borderRadius: 8,
-  gap: 8,
+  brSm: 4,
+  brMd: 8,
+  brLg: 16,
+
+  gapSm: 4,
+  gapMd: 8,
+  gapLg: 16,
 };

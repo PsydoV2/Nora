@@ -20,12 +20,15 @@ export default function Toast({
   const colorScheme = useColorScheme();
   const colorPalette = colorScheme == "dark" ? Colors.dark : Colors.light;
 
-  const bgColor =
+  let bgColor =
     type === "success"
       ? colorPalette.success
       : type === "error"
-      ? colorPalette.danger
-      : colorPalette.info;
+        ? colorPalette.danger
+        : colorPalette.info;
+
+  const textColor = bgColor;
+  bgColor = `${bgColor}60`;
 
   useEffect(() => {
     Animated.spring(translateY, {
@@ -70,13 +73,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 12,
     zIndex: 9999,
-    shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
   },
   text: {
     color: "white",
     fontWeight: "600",
+    backgroundColor: "transparent",
   },
 });

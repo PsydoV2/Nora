@@ -28,7 +28,7 @@ export function SessionProvider({ children }: React.PropsWithChildren) {
     async (token: string) => {
       setSession(token);
     },
-    [setSession]
+    [setSession],
   );
 
   const signOut = useCallback(async () => {
@@ -43,7 +43,7 @@ export function SessionProvider({ children }: React.PropsWithChildren) {
       signIn,
       signOut,
     }),
-    [session, isLoading, signIn, signOut]
+    [session, isLoading, signIn, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

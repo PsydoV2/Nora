@@ -4,7 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import * as SystemUI from "expo-system-ui";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { useColorScheme } from "react-native";
+import { StatusBar, useColorScheme } from "react-native";
 import {
   DarkTheme,
   DefaultTheme,
@@ -39,7 +39,7 @@ export default function RootLayout() {
     if (loaded) {
       const bg = scheme === "dark" ? Colors.dark.bgDark : Colors.light.bgDark;
       SystemUI.setBackgroundColorAsync(bg).finally(() =>
-        SplashScreen.hideAsync()
+        SplashScreen.hideAsync(),
       );
     }
   }, [loaded, scheme]);
@@ -51,7 +51,10 @@ export default function RootLayout() {
       <UserProvider>
         <SessionProvider>
           <ToastProvider>
-            <ThemeProvider value={scheme === "dark" ? DarkTheme : DefaultTheme}>
+            <ThemeProvider
+              value={scheme === "dark" ? DefaultTheme : DefaultTheme}
+            >
+              <StatusBar barStyle={"dark-content"}></StatusBar>
               <Slot />
             </ThemeProvider>
           </ToastProvider>
