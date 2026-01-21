@@ -19,6 +19,7 @@ import { useToast } from "@/src/context/ToastProvider";
 import StyleVariables from "@/constants/StyleVariables";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useSession } from "@/src/context/AuthContext";
+import { useSubjects } from "@/src/context/SubjectContext";
 
 const PASSWORD_KEY = "nora_user_pin";
 const OTP_LENGTH = 6;
@@ -42,6 +43,8 @@ export default function SettingsScreen() {
   const [otp, setOtp] = useState<string[]>(new Array(OTP_LENGTH).fill(""));
   const [focusedIndex, setFocusedIndex] = useState<number | null>(0);
   const inputRefs = useRef<Array<TextInput | null>>([]);
+
+  const { deleteAllData } = useSubjects();
 
   useEffect(() => {
     const checkPinStatus = async () => {
@@ -151,7 +154,9 @@ export default function SettingsScreen() {
     setTempPin("");
   };
 
-  const handleDeleteUserData = () => {};
+  const handleDeleteUserData = () => {
+    deleteAllData();
+  };
 
   return (
     <View style={styles.container}>

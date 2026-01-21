@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   StyleSheet,
   View,
@@ -13,54 +13,121 @@ import {
 } from "react-native";
 import { Octicons } from "@expo/vector-icons";
 import StyleVariables from "@/constants/StyleVariables";
-import { StatusBar } from "react-native";
+import { DTOSubject, useSubjects } from "@/src/context/SubjectContext";
 
 export default function Home() {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedYear, setSelectedYear] = useState("2023/24");
   const colorScheme = useColorScheme();
   const colors = StyleVariables[colorScheme ?? "light"];
   const styles = getStyles(colors);
+  const { addSubject, subjects, updateGrade, deleteSubject } = useSubjects();
 
-  // Dummy-Daten für die Optik
-  const [subjects, setSubjects] = useState([
-    { id: "1", name: "Mathematik", color: "#4A90E2", examsPerYear: 3 },
-    { id: "2", name: "Deutsch", color: "#E35D5D", examsPerYear: 2 },
-    { id: "3", name: "Englisch", color: "#50C878", examsPerYear: 2 },
-  ]);
+  // Modals Visibility
+  const [addModalVisible, setAddModalVisible] = useState(false);
+  const [yearModalVisible, setYearModalVisible] = useState(false);
+  const [menuModalVisible, setMenuModalVisible] = useState(false);
+
+  // States
+  const [selectedYear, setSelectedYear] = useState("2025/26");
+  const [activeSubject, setActiveSubject] = useState<DTOSubject | null>(null);
+
+  // States für neues Fach
+  const [newSubjectName, setNewSubjectName] = useState("");
+  const [gradeAmount, setGradeAmount] = useState("2");
+  const [selectedColor, setSelectedColor] = useState("#4A90E2");
+
+  // Schuljahr-Logik: Heute bis 15 Jahre zurück
+  const availableYears = useMemo(() => {
+    const years = [];
+    const currentYear = new Date().getFullYear();
+    for (let i = 0; i < 16; i++) {
+      const year = currentYear - i;
+      years.push(`${year - 1}/${year.toString().slice(-2)}`);
+    }
+    return years;
+  }, []);
+
+  const subjectsCurrentYear = subjects.filter(
+    (s) => s.schoolyear === selectedYear
+  );
+
+  const handleAddSubject = async () => {
+    if (!newSubjectName.trim()) return;
+    const amount = parseInt(gradeAmount) || 0;
+    await addSubject({
+      subject: newSubjectName,
+      schoolyear: selectedYear,
+      accentColor: selectedColor,
+      gradeAmount: amount,
+      grades: Array(amount).fill(null),
+    });
+    setNewSubjectName("");
+    setGradeAmount("2");
+    setAddModalVisible(false);
+  };
+
+  const openMenu = (subject: DTOSubject) => {
+    setActiveSubject(subject);
+    setMenuModalVisible(true);
+  };
+
+  const handleDelete = async () => {
+    if (activeSubject) {
+      await deleteSubject(activeSubject.uuid);
+      setMenuModalVisible(false);
+      setActiveSubject(null);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle={"dark-content"}></StatusBar>
-      {/* Header mit Dropdown-Bereich */}
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}></Text>
-        <TouchableOpacity style={styles.yearDropdown}>
+        <TouchableOpacity
+          style={styles.yearDropdown}
+          onPress={() => setYearModalVisible(true)}
+        >
           <Text style={styles.yearText}>{selectedYear}</Text>
           <Octicons name="chevron-down" size={16} color={colors.text} />
         </TouchableOpacity>
       </View>
 
+      {/* Liste */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {subjects.map((subject) => (
-          <View key={subject.id} style={styles.subjectCard}>
-            {/* Linkes Quadrat mit Anfangsbuchstaben */}
+        {subjectsCurrentYear.map((subject) => (
+          <View key={subject.uuid} style={styles.subjectCard}>
             <View
               style={[
                 styles.subjectIcon,
-                { backgroundColor: `${subject.color}40` },
+                { backgroundColor: `${subject.accentColor}40` },
               ]}
             >
-              <Text style={[styles.subjectIconText, { color: subject.color }]}>
-                {subject.name.charAt(0).toUpperCase()}
+              <Text
+                style={[styles.subjectIconText, { color: subject.accentColor }]}
+              >
+                {subject.subject.charAt(0).toUpperCase()}
               </Text>
             </View>
 
-            {/* Mittlerer Bereich: Name und Notenfelder */}
             <View style={styles.subjectInfo}>
-              <Text style={styles.subjectName}>{subject.name}</Text>
+              <View style={styles.subjectHeaderRow}>
+                <Text style={[styles.subjectName, { color: colors.text }]}>
+                  {subject.subject}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => openMenu(subject)}
+                  style={styles.menuTrigger}
+                >
+                  <Octicons
+                    name="kebab-horizontal"
+                    size={20}
+                    color={colors.textMuted}
+                  />
+                </TouchableOpacity>
+              </View>
+
               <View style={styles.gradesRow}>
-                {Array.from({ length: subject.examsPerYear }).map((_, i) => (
+                {subject.grades.map((grade, i) => (
                   <View key={i} style={styles.gradeBox}>
                     <TextInput
                       placeholder="-"
@@ -68,6 +135,8 @@ export default function Home() {
                       keyboardType="numeric"
                       maxLength={2}
                       style={styles.gradeInput}
+                      value={grade?.toString() || ""}
+                      onChangeText={(val) => updateGrade(subject.uuid, i, val)}
                     />
                   </View>
                 ))}
@@ -77,63 +146,145 @@ export default function Home() {
         ))}
       </ScrollView>
 
-      {/* Floating Action Button */}
+      {/* FAB */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => setModalVisible(true)}
+        onPress={() => setAddModalVisible(true)}
       >
         <Octicons name="plus" size={28} color={colors.primary} />
       </TouchableOpacity>
 
-      {/* Modal zum Hinzufügen */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
+      {/* Modal: Schuljahr wählen */}
+      <Modal visible={yearModalVisible} transparent animationType="fade">
+        <TouchableOpacity
+          style={styles.modalBackdrop}
+          activeOpacity={1}
+          onPress={() => setYearModalVisible(false)}
+        >
+          <View style={[styles.modalView, { maxHeight: "60%" }]}>
+            <Text style={styles.modalTitle}>Schuljahr wählen</Text>
+            <ScrollView style={{ width: "100%" }}>
+              {availableYears.map((y) => (
+                <TouchableOpacity
+                  key={y}
+                  style={styles.optionRow}
+                  onPress={() => {
+                    setSelectedYear(y);
+                    setYearModalVisible(false);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.optionText,
+                      {
+                        color:
+                          selectedYear === y ? colors.primary : colors.text,
+                      },
+                    ]}
+                  >
+                    {y}
+                  </Text>
+                  {selectedYear === y && (
+                    <Octicons name="check" size={18} color={colors.primary} />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Modal: Fach-Optionen (Edit/Delete) */}
+      <Modal visible={menuModalVisible} transparent animationType="slide">
+        <TouchableOpacity
+          style={styles.modalBackdrop}
+          activeOpacity={1}
+          onPress={() => setMenuModalVisible(false)}
+        >
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>{activeSubject?.subject}</Text>
+            <TouchableOpacity
+              style={styles.optionRow}
+              onPress={() => {
+                /* Edit Logik */
+              }}
+            >
+              <Octicons name="pencil" size={20} color={colors.text} />
+              <Text style={[styles.optionText, { marginLeft: 15 }]}>
+                Bearbeiten
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.optionRow} onPress={handleDelete}>
+              <Octicons name="trash" size={20} color={colors.danger} />
+              <Text
+                style={[
+                  styles.optionText,
+                  { color: colors.danger, marginLeft: 15 },
+                ]}
+              >
+                Löschen
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setMenuModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Abbrechen</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Modal: Hinzufügen */}
+      <Modal visible={addModalVisible} transparent animationType="slide">
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.modalBackdrop}
         >
           <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Neues Fach hinzufügen</Text>
-
+            <Text style={styles.modalTitle}>Neues Fach ({selectedYear})</Text>
             <TextInput
               placeholder="Name des Fachs"
               style={styles.input}
               placeholderTextColor="#999"
+              value={newSubjectName}
+              onChangeText={setNewSubjectName}
             />
-
             <TextInput
-              placeholder="Klausuren pro Jahr (z.B. 2)"
+              placeholder="Anzahl Klausuren"
               keyboardType="numeric"
               style={styles.input}
               placeholderTextColor="#999"
+              value={gradeAmount}
+              onChangeText={setGradeAmount}
             />
-
-            <Text style={styles.label}>Akzentfarbe</Text>
             <View style={styles.colorPicker}>
               {["#4A90E2", "#E35D5D", "#50C878", "#F5A623", "#9B59B6"].map(
                 (c) => (
                   <TouchableOpacity
                     key={c}
-                    style={[styles.colorOption, { backgroundColor: `${c}` }]}
+                    onPress={() => setSelectedColor(c)}
+                    style={[
+                      styles.colorOption,
+                      {
+                        backgroundColor: c,
+                        borderWidth: selectedColor === c ? 3 : 0,
+                        borderColor: colors.text,
+                      },
+                    ]}
                   />
                 )
               )}
             </View>
-
             <TouchableOpacity
               style={styles.addButton}
-              onPress={() => setModalVisible(false)}
+              onPress={handleAddSubject}
             >
               <Text style={styles.addButtonText}>Hinzufügen</Text>
             </TouchableOpacity>
-
             <TouchableOpacity
               style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
+              onPress={() => setAddModalVisible(false)}
             >
               <Text style={styles.closeButtonText}>Abbrechen</Text>
             </TouchableOpacity>
@@ -144,12 +295,9 @@ export default function Home() {
   );
 }
 
-const getStyles = (colors: typeof StyleVariables.light) =>
+const getStyles = (colors: typeof StyleVariables.dark) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.bg,
-    },
+    container: { flex: 1, backgroundColor: colors.bg },
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -158,10 +306,7 @@ const getStyles = (colors: typeof StyleVariables.light) =>
       paddingTop: 60,
       paddingBottom: 20,
     },
-    headerTitle: {
-      fontSize: 28,
-      fontWeight: "900",
-    },
+    headerTitle: { fontSize: 28, fontWeight: "900", color: colors.text },
     yearDropdown: {
       flexDirection: "row",
       alignItems: "center",
@@ -174,21 +319,23 @@ const getStyles = (colors: typeof StyleVariables.light) =>
     },
     yearText: {
       fontSize: 14,
-      fontWeight: "700",
+      fontWeight: "900",
       color: colors.text,
       marginRight: 6,
     },
     scrollContent: {
-      paddingHorizontal: 20,
+      paddingHorizontal: StyleVariables.gapLg,
       paddingBottom: 100,
     },
     subjectCard: {
       flexDirection: "row",
       borderRadius: StyleVariables.brLg,
-      padding: 15,
+      padding: StyleVariables.gapMd,
       marginBottom: 12,
       alignItems: "center",
       backgroundColor: colors.bgLight,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
     },
     subjectIcon: {
       width: 50,
@@ -197,22 +344,17 @@ const getStyles = (colors: typeof StyleVariables.light) =>
       justifyContent: "center",
       alignItems: "center",
     },
-    subjectIconText: {
-      fontSize: 22,
-      fontWeight: "bold",
-    },
-    subjectInfo: {
-      flex: 1,
-      marginLeft: StyleVariables.gapLg,
-    },
-    subjectName: {
-      fontSize: 18,
-      fontWeight: "800",
+    subjectIconText: { fontSize: 22, fontWeight: "bold" },
+    subjectInfo: { flex: 1, marginLeft: StyleVariables.gapLg },
+    subjectHeaderRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
       marginBottom: StyleVariables.gapSm,
     },
-    gradesRow: {
-      flexDirection: "row",
-    },
+    subjectName: { fontSize: 18, fontWeight: "800" },
+    menuTrigger: { padding: 5 },
+    gradesRow: { flexDirection: "row" },
     gradeBox: {
       width: 35,
       height: 35,
@@ -230,7 +372,7 @@ const getStyles = (colors: typeof StyleVariables.light) =>
       fontWeight: "bold",
       color: colors.text,
       width: "100%",
-      paddingBottom: 7,
+      paddingBottom: StyleVariables.gapMd,
     },
     fab: {
       position: "absolute",
@@ -243,39 +385,42 @@ const getStyles = (colors: typeof StyleVariables.light) =>
       justifyContent: "center",
       alignItems: "center",
     },
-    // Modal Styles
     modalBackdrop: {
       flex: 1,
       justifyContent: "flex-end",
-      backgroundColor: "rgba(0,0,0,0.4)",
+      backgroundColor: `${"#000000"}20`,
     },
     modalView: {
-      backgroundColor: colors.bgDark,
+      backgroundColor: colors.bgLight,
       borderTopLeftRadius: StyleVariables.brLg,
       borderTopRightRadius: StyleVariables.brLg,
       padding: 30,
       alignItems: "center",
+      width: "100%",
     },
     modalTitle: {
       fontSize: 20,
       fontWeight: "900",
-      marginBottom: StyleVariables.gapLg,
+      marginBottom: 20,
       color: colors.text,
     },
+    optionRow: {
+      width: "100%",
+      paddingVertical: 18,
+      flexDirection: "row",
+      alignItems: "center",
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
+    },
+    optionText: { fontSize: 18, fontWeight: "600", color: colors.text },
     input: {
       width: "100%",
       backgroundColor: colors.bg,
-      padding: StyleVariables.gapLg,
+      padding: 16,
       borderRadius: StyleVariables.brMd,
       marginBottom: 15,
       fontSize: 16,
-    },
-    label: {
-      alignSelf: "flex-start",
-      fontSize: 14,
-      fontWeight: "700",
-      marginBottom: 10,
-      opacity: 0.6,
+      color: colors.text,
     },
     colorPicker: {
       flexDirection: "row",
@@ -283,11 +428,7 @@ const getStyles = (colors: typeof StyleVariables.light) =>
       width: "100%",
       marginBottom: 25,
     },
-    colorOption: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-    },
+    colorOption: { width: 40, height: 40, borderRadius: 20 },
     addButton: {
       backgroundColor: colors.primary,
       width: "100%",
@@ -296,16 +437,7 @@ const getStyles = (colors: typeof StyleVariables.light) =>
       alignItems: "center",
       marginBottom: 10,
     },
-    addButtonText: {
-      color: "white",
-      fontWeight: "bold",
-      fontSize: 16,
-    },
-    closeButton: {
-      padding: 10,
-    },
-    closeButtonText: {
-      color: colors.danger,
-      fontWeight: "700",
-    },
+    addButtonText: { color: "white", fontWeight: "bold", fontSize: 16 },
+    closeButton: { marginTop: 10, padding: 10 },
+    closeButtonText: { color: colors.danger, fontWeight: "700", fontSize: 16 },
   });

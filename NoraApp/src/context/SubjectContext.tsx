@@ -18,6 +18,8 @@ interface SubjectContextType {
     gradeIndex: number,
     value: string
   ) => Promise<void>;
+  deleteSubject: (uuid: string) => Promise<void>;
+  deleteAllData: () => Promise<void>;
   loading: boolean;
 }
 
@@ -82,9 +84,20 @@ export const SubjectProvider: React.FC<{ children: React.ReactNode }> = ({
     await saveData(newList);
   };
 
+  const deleteSubject = async (uuid: string) => {};
+
+  const deleteAllData = async () => {};
+
   return (
     <SubjectContext.Provider
-      value={{ subjects, addSubject, updateGrade, loading }}
+      value={{
+        subjects,
+        addSubject,
+        updateGrade,
+        loading,
+        deleteSubject,
+        deleteAllData,
+      }}
     >
       {children}
     </SubjectContext.Provider>
