@@ -1,4 +1,7 @@
+"use client";
+
 import Head from "next/head";
+import { motion } from "framer-motion";
 
 export default function NoraLanding() {
   const subjects = [
@@ -6,6 +9,20 @@ export default function NoraLanding() {
     { name: "Physik", color: "#9B59B6", initial: "P", grades: [1, 1] },
     { name: "Englisch", color: "#50C878", initial: "E", grades: [2, 1, 2] },
   ];
+
+  // Animationsvarianten für Stagger-Effekt (Elemente erscheinen nacheinander)
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.2 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  };
 
   return (
     <>
@@ -15,60 +32,73 @@ export default function NoraLanding() {
 
       <nav className="navbar">
         <div className="container nav-content">
-          <a href="#" className="brand">
+          <motion.a
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            href="#"
+            className="brand"
+          >
             nora
-          </a>
-          <a href="#" className="btn-primary">
+          </motion.a>
+          <motion.a
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            href="#"
+            className="btn-primary"
+          >
             App öffnen
-          </a>
+          </motion.a>
         </div>
       </nav>
 
       <main>
         {/* HERO SECTION */}
-        <header className="hero container">
-          <h1>
+        <motion.header
+          className="hero container"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
+          <motion.h1 variants={itemVariants}>
             Dein Schnitt, <br />
             <span>deine Kontrolle.</span>
-          </h1>
-          <p>
+          </motion.h1>
+          <motion.p variants={itemVariants}>
             Organisiere deine Klausuren, berechne deinen Schnitt und schütze
             deine Daten mit einer PIN. Alles lokal, alles sicher.
-          </p>
-          <div className="button-group">
-            <a href="#" className="btn-primary btn-primary-lg">
+          </motion.p>
+          <motion.div variants={itemVariants} className="button-group">
+            <motion.a
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              href="#"
+              className="btn-primary btn-primary-lg"
+            >
               Kostenlos starten
-            </a>
-          </div>
-        </header>
+            </motion.a>
+          </motion.div>
+        </motion.header>
 
-        {/* INSIGHTS / STATS SECTION */}
-        <section className="container" style={{ marginTop: "60px" }}>
-          <div className="stats-grid">
-            <div className="stat-card">
-              <span className="stat-value">1.4</span>
-              <span className="stat-label">Gesamtschnitt</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-value">12</span>
-              <span className="stat-label">Abgeschlossene Klausuren</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-value">Bestwert</span>
-              <span className="stat-label">In Mathematik & Englisch</span>
-            </div>
-          </div>
-        </section>
-
-        {/* APP PREVIEW */}
+        {/* APP PREVIEW - Erscheint beim Scrollen */}
         <section className="container">
-          <div className="app-mockup">
+          <motion.div
+            className="app-mockup"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
             <div className="app-header">
               <span>Noten</span>
               <div className="year-badge">2025/26 ▾</div>
             </div>
             {subjects.map((s, i) => (
-              <div key={i} className="subject-card">
+              <motion.div
+                key={i}
+                className="subject-card"
+                whileHover={{ x: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
                 <div
                   className="subject-avatar"
                   style={{ backgroundColor: `${s.color}20`, color: s.color }}
@@ -85,16 +115,75 @@ export default function NoraLanding() {
                     ))}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
-            <div className="fab-simulation">+</div>
-          </div>
+            <motion.div
+              className="fab-simulation"
+              whileHover={{ scale: 1.1, rotate: 90 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              +
+            </motion.div>
+          </motion.div>
         </section>
 
-        {/* FEATURES SECTION */}
+        {/* STATS SECTION */}
+        <section className="container" style={{ marginTop: "60px" }}>
+          <motion.div
+            className="stats-grid"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={containerVariants}
+          >
+            <motion.div variants={itemVariants} className="stat-card-rich">
+              <div>
+                <span className="stat-label">Notenschnitt</span>
+                <span className="stat-value">1,4</span>
+              </div>
+              <div className="trending-up">📈 +0.2 Verbesserung</div>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="stat-card-rich">
+              <div>
+                <span className="stat-label">Ziel (1,2)</span>
+                <div className="progress-bar-bg">
+                  <motion.div
+                    className="progress-bar-fill"
+                    initial={{ width: 0 }}
+                    whileInView={{ width: "75%" }}
+                    transition={{ duration: 1, delay: 0.5 }}
+                  />
+                </div>
+              </div>
+              <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                Noch 3 Klausuren bis zum Ziel
+              </span>
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="stat-card-rich">
+              <span className="stat-label">Stärkstes Fach</span>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              >
+                <div
+                  className="subject-avatar-mini"
+                  style={{ backgroundColor: "#4A90E220", color: "#4A90E2" }}
+                >
+                  M
+                </div>
+                <span style={{ fontWeight: "800" }}>Mathematik (1,0)</span>
+              </div>
+            </motion.div>
+          </motion.div>
+        </section>
+
+        {/* FEATURES GRID */}
         <section className="features-section">
           <div className="container">
-            <h2
+            <motion.h2
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               style={{
                 fontWeight: 900,
                 fontSize: "40px",
@@ -103,94 +192,72 @@ export default function NoraLanding() {
               }}
             >
               Warum nora?
-            </h2>
+            </motion.h2>
             <div className="features-grid">
-              <div className="feature-item">
-                <div className="feature-icon">🔒</div>
-                <h3>PIN-Sperre</h3>
-                <p>
-                  Niemand sieht deine Noten ohne deine Erlaubnis. Schütze die
-                  App mit einem 6-stelligen Code.
-                </p>
-              </div>
-              <div className="feature-item">
-                <div className="feature-icon">📊</div>
-                <h3>Echtzeit-Schnitt</h3>
-                <p>
-                  Sobald du eine Note einträgst, berechnet nora sofort deinen
-                  neuen Durchschnitt für jedes Fach.
-                </p>
-              </div>
-              <div className="feature-item">
-                <div className="feature-icon">☁️</div>
-                <h3>100% Lokal</h3>
-                <p>
-                  Deine Daten gehören dir. Keine Cloud, kein Tracking, keine
-                  Server. Alles auf deinem Gerät.
-                </p>
-              </div>
+              {[
+                {
+                  icon: "🔒",
+                  title: "PIN-Sperre",
+                  desc: "Niemand sieht deine Noten ohne deine Erlaubnis.",
+                },
+                {
+                  icon: "📊",
+                  title: "Echtzeit-Schnitt",
+                  desc: "Berechnet sofort deinen neuen Durchschnitt.",
+                },
+                {
+                  icon: "☁️",
+                  title: "100% Lokal",
+                  desc: "Deine Daten gehören dir. Keine Cloud, kein Tracking.",
+                },
+              ].map((f, i) => (
+                <motion.div
+                  key={i}
+                  className="feature-item"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                >
+                  <div className="feature-icon">{f.icon}</div>
+                  <h3>{f.title}</h3>
+                  <p>{f.desc}</p>
+                </motion.div>
+              ))}
             </div>
-          </div>
-        </section>
-
-        {/* FAQ SECTION */}
-        <section className="container faq-section">
-          <h2
-            style={{ fontWeight: 900, fontSize: "32px", marginBottom: "40px" }}
-          >
-            Häufig gestellte Fragen
-          </h2>
-          <div className="faq-item">
-            <span className="faq-question">Wie sicher sind meine Daten?</span>
-            <p className="faq-answer">
-              Da nora keine Server nutzt, verlassen deine Daten niemals dein
-              Handy. Die PIN-Sperre schützt dich vor neugierigen Blicken vor
-              Ort.
-            </p>
-          </div>
-          <div className="faq-item">
-            <span className="faq-question">Kostet nora etwas?</span>
-            <p className="faq-answer">
-              nora ist komplett kostenlos und werbefrei.
-            </p>
-          </div>
-          <div className="faq-item">
-            <span className="faq-question">Kann ich Daten exportieren?</span>
-            <p className="faq-answer">
-              Wir arbeiten aktuell an einer Export-Funktion, damit du deine
-              Noten als PDF sichern kannst.
-            </p>
           </div>
         </section>
 
         {/* SAFETY FOOTER */}
         <section className="safety container">
-          <div className="badge">
+          <motion.div
+            className="badge"
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 3, repeat: Infinity }}
+          >
             <div className="dot"></div>
             <span>Privatsphäre an erster Stelle</span>
-          </div>
-          <h2>Bereit für den Überblick?</h2>
+          </motion.div>
+          <motion.h2 initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}>
+            Bereit für den Überblick?
+          </motion.h2>
           <div className="button-group">
-            <a href="#" className="btn-danger">
+            <motion.a whileHover={{ x: -5 }} href="#" className="btn-danger">
               Daten löschen
-            </a>
-            <a href="#" className="btn-primary">
+            </motion.a>
+            <motion.a
+              whileHover={{ scale: 1.05 }}
+              href="#"
+              className="btn-primary"
+            >
               Jetzt starten
-            </a>
+            </motion.a>
           </div>
         </section>
       </main>
 
-      <footer
-        style={{
-          padding: "40px 0",
-          textAlign: "center",
-          borderTop: "1px solid var(--bg-dark)",
-          color: "var(--text-muted)",
-          fontSize: "14px",
-        }}
-      >
-        &copy; 2026 nora App. Alle Rechte vorbehalten.
+      <footer className="footer-main">
+        &copy; 2026 Sebastian Falter | Alle Rechte vorbehalten.
       </footer>
     </>
   );
