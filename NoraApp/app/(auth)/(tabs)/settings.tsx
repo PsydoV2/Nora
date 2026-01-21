@@ -45,6 +45,7 @@ export default function SettingsScreen() {
   const inputRefs = useRef<Array<TextInput | null>>([]);
 
   const { deleteAllData } = useSubjects();
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   useEffect(() => {
     const checkPinStatus = async () => {
@@ -155,6 +156,10 @@ export default function SettingsScreen() {
   };
 
   const handleDeleteUserData = () => {
+    setDeleteModalVisible(true);
+  };
+
+  const executeDeleteUserData = () => {
     deleteAllData();
   };
 
@@ -242,6 +247,36 @@ export default function SettingsScreen() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={deleteModalVisible}
+        onRequestClose={() => setDeleteModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.modalBackdrop}
+        >
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>Daten löschen</Text>
+            <Text style={styles.modalDescription}>
+              Dies kann nicht rückgängig gemacht werden!
+            </Text>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={executeDeleteUserData}
+            >
+              <Text style={[styles.closeButtonText, { color: colors.danger }]}>
+                Löschen
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+              <Text style={styles.closeButtonText}>Abbrechen</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }
@@ -271,21 +306,20 @@ const getStyles = (colors: typeof StyleVariables.light) =>
     modalBackdrop: {
       flex: 1,
       justifyContent: "flex-end",
-      backgroundColor: "rgba(0,0,0,0.5)",
+      backgroundColor: `${"#000000"}20`,
     },
     modalView: {
-      backgroundColor: colors.bgDark,
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
+      backgroundColor: colors.bgLight,
+      borderTopLeftRadius: StyleVariables.brLg,
+      borderTopRightRadius: StyleVariables.brLg,
       padding: 35,
       alignItems: "center",
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: -2 },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-      elevation: 5,
     },
-    modalTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 8 },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: "bold",
+      marginBottom: StyleVariables.gapLg,
+    },
     modalDescription: {
       fontSize: 14,
       color: colors.text,

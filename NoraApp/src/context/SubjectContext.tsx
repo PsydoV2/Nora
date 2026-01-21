@@ -84,9 +84,29 @@ export const SubjectProvider: React.FC<{ children: React.ReactNode }> = ({
     await saveData(newList);
   };
 
-  const deleteSubject = async (uuid: string) => {};
+  const deleteSubject = async (uuid: string) => {
+    try {
+      // Filtere das Fach aus der aktuellen Liste
+      const newList = subjects.filter((s) => s.uuid !== uuid);
 
-  const deleteAllData = async () => {};
+      // Speichere die neue Liste im Storage und aktualisiere den State
+      await saveData(newList);
+    } catch (e) {
+      console.error("Fehler beim Löschen des Fachs:", e);
+    }
+  };
+
+  const deleteAllData = async () => {
+    try {
+      // Entferne den gesamten Key aus dem AsyncStorage
+      await AsyncStorage.removeItem(STORAGE_KEY);
+
+      // Setze den lokalen State zurück auf eine leere Liste
+      setSubjects([]);
+    } catch (e) {
+      console.error("Fehler beim Löschen aller Daten:", e);
+    }
+  };
 
   return (
     <SubjectContext.Provider

@@ -94,6 +94,10 @@ export default function Home() {
 
       {/* Liste */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        {subjectsCurrentYear.length == 0 && (
+          <Text style={styles.emptyText}>Keine Einträge bisher</Text>
+          // TODO Möglichkeit einbauen Subjects aus letztem Jahr zu kopieren
+        )}
         {subjectsCurrentYear.map((subject) => (
           <View key={subject.uuid} style={styles.subjectCard}>
             <View
@@ -326,6 +330,10 @@ const getStyles = (colors: typeof StyleVariables.dark) =>
     scrollContent: {
       paddingHorizontal: StyleVariables.gapLg,
       paddingBottom: 100,
+    },
+    emptyText: {
+      color: colors.textMuted,
+      textAlign: "center",
     },
     subjectCard: {
       flexDirection: "row",
