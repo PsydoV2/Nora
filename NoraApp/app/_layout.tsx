@@ -15,6 +15,7 @@ import { Slot } from "expo-router";
 import Colors from "@/constants/StyleVariables";
 import { UserProvider } from "@/src/context/UserProvider";
 import { ToastProvider } from "@/src/context/ToastProvider";
+import { SubjectProvider } from "@/src/context/SubjectContext";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -39,7 +40,7 @@ export default function RootLayout() {
     if (loaded) {
       const bg = scheme === "dark" ? Colors.dark.bgDark : Colors.light.bgDark;
       SystemUI.setBackgroundColorAsync(bg).finally(() =>
-        SplashScreen.hideAsync(),
+        SplashScreen.hideAsync()
       );
     }
   }, [loaded, scheme]);
@@ -51,12 +52,14 @@ export default function RootLayout() {
       <UserProvider>
         <SessionProvider>
           <ToastProvider>
-            <ThemeProvider
-              value={scheme === "dark" ? DefaultTheme : DefaultTheme}
-            >
-              <StatusBar barStyle={"dark-content"}></StatusBar>
-              <Slot />
-            </ThemeProvider>
+            <SubjectProvider>
+              <ThemeProvider
+                value={scheme === "dark" ? DefaultTheme : DefaultTheme}
+              >
+                <StatusBar barStyle={"dark-content"}></StatusBar>
+                <Slot />
+              </ThemeProvider>
+            </SubjectProvider>
           </ToastProvider>
         </SessionProvider>
       </UserProvider>

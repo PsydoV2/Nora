@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { Octicons } from "@expo/vector-icons";
 import StyleVariables from "@/constants/StyleVariables";
+import { StatusBar } from "react-native";
 
 export default function Home() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -30,6 +31,7 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle={"dark-content"}></StatusBar>
       {/* Header mit Dropdown-Bereich */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}></Text>
@@ -62,7 +64,7 @@ export default function Home() {
                   <View key={i} style={styles.gradeBox}>
                     <TextInput
                       placeholder="-"
-                      placeholderTextColor="#999"
+                      placeholderTextColor={colors.textMuted}
                       keyboardType="numeric"
                       maxLength={2}
                       style={styles.gradeInput}
@@ -167,8 +169,8 @@ const getStyles = (colors: typeof StyleVariables.light) =>
       paddingHorizontal: 12,
       paddingVertical: 6,
       borderRadius: StyleVariables.brMd,
-      borderWidth: 1,
-      borderColor: colors.borderMuted,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.border,
     },
     yearText: {
       fontSize: 14,
@@ -228,6 +230,7 @@ const getStyles = (colors: typeof StyleVariables.light) =>
       fontWeight: "bold",
       color: colors.text,
       width: "100%",
+      paddingBottom: 7,
     },
     fab: {
       position: "absolute",
@@ -247,21 +250,22 @@ const getStyles = (colors: typeof StyleVariables.light) =>
       backgroundColor: "rgba(0,0,0,0.4)",
     },
     modalView: {
-      backgroundColor: "white",
-      borderTopLeftRadius: 25,
-      borderTopRightRadius: 25,
+      backgroundColor: colors.bgDark,
+      borderTopLeftRadius: StyleVariables.brLg,
+      borderTopRightRadius: StyleVariables.brLg,
       padding: 30,
       alignItems: "center",
     },
     modalTitle: {
       fontSize: 20,
       fontWeight: "900",
-      marginBottom: 20,
+      marginBottom: StyleVariables.gapLg,
+      color: colors.text,
     },
     input: {
       width: "100%",
       backgroundColor: colors.bg,
-      padding: 15,
+      padding: StyleVariables.gapLg,
       borderRadius: StyleVariables.brMd,
       marginBottom: 15,
       fontSize: 16,
