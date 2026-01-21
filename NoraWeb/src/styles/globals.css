@@ -1,0 +1,255 @@
+:root {
+  /* Deine Variablen */
+  --br-sm: 4px;
+  --br-md: 8px;
+  --br-lg: 16px;
+
+  --gap-sm: 4px;
+  --gap-md: 8px;
+  --gap-lg: 16px;
+
+  --bg-dark: #e8e8e8;
+  --bg: #f2f2f2;
+  --bg-light: #ffffff;
+  --text: #212121;
+  --text-muted: #5e5e5e;
+  --primary: #0c3cd4;
+  --primary-20: rgba(12, 60, 212, 0.2);
+  --danger: #a6192e;
+  --danger-20: rgba(166, 25, 46, 0.2);
+  --success: #04b34f;
+  --border: #919191;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* --- Navigation --- */
+.navbar {
+  padding: 30px 0;
+}
+
+.nav-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--text);
+  text-decoration: none;
+}
+
+/* --- Buttons (Nora Style) --- */
+.btn-primary {
+  background-color: var(--primary-20);
+  color: var(--primary);
+  padding: 12px 24px;
+  border-radius: var(--br-md);
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.2s;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-primary-lg {
+  padding: 18px 36px;
+  font-size: 18px;
+}
+
+.btn-danger {
+  background-color: var(--danger-20);
+  color: var(--danger);
+  padding: 12px 24px;
+  border-radius: var(--br-md);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.btn-primary:hover,
+.btn-danger:hover {
+  opacity: 0.7;
+}
+
+/* --- Hero Section --- */
+.hero {
+  padding-top: 80px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: clamp(40px, 8vw, 72px);
+  font-weight: 900;
+  letter-spacing: -2px;
+  line-height: 1;
+  margin-bottom: 24px;
+}
+
+.hero h1 span {
+  color: var(--primary);
+}
+
+.hero p {
+  font-size: 20px;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto 40px;
+}
+
+/* --- App Mockup (Visualisierung deines Designs) --- */
+.app-mockup {
+  background-color: var(--bg-dark);
+  border-radius: 40px;
+  padding: 40px 20px;
+  max-width: 360px;
+  margin: 60px auto;
+  border: 10px solid #212121;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 0 10px;
+}
+
+.app-header span {
+  font-weight: 900;
+  font-size: 24px;
+}
+
+.year-badge {
+  background-color: var(--bg-light);
+  padding: 6px 12px;
+  border-radius: var(--br-md);
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid var(--border);
+}
+
+.subject-card {
+  background-color: var(--bg-light);
+  padding: 16px;
+  border-radius: var(--br-lg);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.subject-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--br-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.subject-info {
+  margin-left: 16px;
+}
+
+.subject-name {
+  font-weight: 800;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.grades-row {
+  display: flex;
+  gap: var(--gap-md);
+}
+
+.grade-box {
+  width: 32px;
+  height: 32px;
+  background-color: var(--bg);
+  border-radius: var(--br-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 900;
+  border: 1px solid var(--border);
+}
+
+.fab-simulation {
+  width: 56px;
+  height: 56px;
+  background-color: var(--primary-20);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  margin-top: 20px;
+  color: var(--primary);
+  font-size: 28px;
+  font-weight: bold;
+}
+
+/* --- Safety Section --- */
+.safety {
+  margin-top: 100px;
+  padding-bottom: 80px;
+  text-align: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: var(--success);
+}
+
+.badge span {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.safety h2 {
+  font-weight: 900;
+  font-size: 32px;
+  margin-bottom: 40px;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
