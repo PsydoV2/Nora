@@ -161,6 +161,7 @@ export default function SettingsScreen() {
 
   const executeDeleteUserData = () => {
     deleteAllData();
+    setDeleteModalVisible(false);
   };
 
   return (
@@ -178,6 +179,42 @@ export default function SettingsScreen() {
               true: `${colors.primary}80`,
             }}
             thumbColor={isPinEnabled ? colors.primary : colors.border}
+            style={{ height: 24 }}
+          />
+        )}
+      </View>
+
+      <View style={styles.settingRow}>
+        <Text style={styles.settingText}>App mit Fingerabdruck sperren</Text>
+        {isLoading ? (
+          <ActivityIndicator color={colors.primary} />
+        ) : (
+          <Switch
+            value={false}
+            onValueChange={() => {}}
+            trackColor={{
+              false: colors.borderMuted,
+              true: `${colors.primary}80`,
+            }}
+            thumbColor={false ? colors.primary : colors.border}
+            style={{ height: 24 }}
+          />
+        )}
+      </View>
+
+      <View style={styles.settingRow}>
+        <Text style={styles.settingText}>App mit Face-ID sperren</Text>
+        {isLoading ? (
+          <ActivityIndicator color={colors.primary} />
+        ) : (
+          <Switch
+            value={false}
+            onValueChange={() => {}}
+            trackColor={{
+              false: colors.borderMuted,
+              true: `${colors.primary}80`,
+            }}
+            thumbColor={false ? colors.primary : colors.border}
             style={{ height: 24 }}
           />
         )}
@@ -201,8 +238,12 @@ export default function SettingsScreen() {
         <Octicons name="lock" size={24} color="red" />
       </TouchableOpacity>
 
+      <Text style={(styles.settingRow, styles.versionFooter)}>
+        &copy;Nora {new Date().getFullYear()} V1.0.0
+      </Text>
+
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={modalVisible}
         onRequestClose={closeModal}
@@ -249,7 +290,7 @@ export default function SettingsScreen() {
       </Modal>
 
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={deleteModalVisible}
         onRequestClose={() => setDeleteModalVisible(false)}
@@ -362,5 +403,13 @@ const getStyles = (colors: typeof StyleVariables.light) =>
     dangerRow: {
       backgroundColor: `${colors.danger}20`,
       borderRadius: StyleVariables.brMd,
+    },
+    versionFooter: {
+      color: colors.textMuted,
+      textAlign: "center",
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.borderMuted,
+      marginTop: StyleVariables.gapLg,
+      paddingTop: StyleVariables.gapMd,
     },
   });
