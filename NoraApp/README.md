@@ -96,11 +96,6 @@ npx expo start
 
 ## 🧭 Roadmap
 
-- [ ] Add signup screen example
-- [ ] Add toast/snackbar system
-- [ ] Integrate API auth demo
-- [ ] Add i18n example (multi-language)
-
 ---
 
 ## 🪪 License

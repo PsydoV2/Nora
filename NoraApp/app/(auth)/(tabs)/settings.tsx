@@ -18,12 +18,14 @@ import { Text } from "@/components/Themed";
 import { useToast } from "@/src/context/ToastProvider";
 import StyleVariables from "@/constants/StyleVariables";
 import Octicons from "@expo/vector-icons/Octicons";
+import { useSession } from "@/src/context/AuthContext";
 
 const PASSWORD_KEY = "nora_user_pin";
 const OTP_LENGTH = 6;
 
 export default function SettingsScreen() {
   const { showToast } = useToast();
+  const { signOut } = useSession();
   const colorScheme = useColorScheme();
   const colors = StyleVariables[colorScheme ?? "light"];
   const styles = getStyles(colors);
@@ -87,7 +89,7 @@ export default function SettingsScreen() {
 
   const handleKeyPress = (
     e: NativeSyntheticEvent<TextInputKeyPressEventData>,
-    index: number,
+    index: number
   ) => {
     if (e.nativeEvent.key === "Backspace" && otp[index] === "" && index > 0) {
       inputRefs.current[index - 1]?.focus();
@@ -149,6 +151,8 @@ export default function SettingsScreen() {
     setTempPin("");
   };
 
+  const handleDeleteUserData = () => {};
+
   return (
     <View style={styles.container}>
       <View style={styles.settingRow}>
@@ -164,15 +168,27 @@ export default function SettingsScreen() {
               true: `${colors.primary}80`,
             }}
             thumbColor={isPinEnabled ? colors.primary : colors.border}
+            style={{ height: 24 }}
           />
         )}
       </View>
 
-      <TouchableOpacity style={[styles.settingRow, styles.dangerRow]}>
+      <TouchableOpacity
+        style={[styles.settingRow, styles.dangerRow]}
+        onPress={handleDeleteUserData}
+      >
         <Text style={[styles.settingText, { color: "red" }]}>
           Daten löschen
         </Text>
         <Octicons name="repo-deleted" size={24} color="red" />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.settingRow, styles.dangerRow]}
+        onPress={signOut}
+      >
+        <Text style={[styles.settingText, { color: "red" }]}>App sperren</Text>
+        <Octicons name="lock" size={24} color="red" />
       </TouchableOpacity>
 
       <Modal
@@ -240,6 +256,8 @@ const getStyles = (colors: typeof StyleVariables.light) =>
       borderBottomWidth: 1,
       borderBottomColor: colors.bg,
       paddingHorizontal: 10,
+      marginBottom: 8,
+      borderRadius: StyleVariables.brMd,
     },
     settingText: {
       fontSize: 16,
