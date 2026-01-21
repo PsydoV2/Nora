@@ -271,7 +271,10 @@ export default function SettingsScreen() {
                 Löschen
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setDeleteModalVisible(false)}
+            >
               <Text style={styles.closeButtonText}>Abbrechen</Text>
             </TouchableOpacity>
           </View>
