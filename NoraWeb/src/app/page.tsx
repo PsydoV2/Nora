@@ -257,7 +257,36 @@ export default function NoraLanding() {
       </main>
 
       <footer className="footer-main">
-        &copy; 2026 Sebastian Falter | Alle Rechte vorbehalten.
+        <div className="container footer-content">
+          <div className="footer-links">
+            <motion.a
+              whileHover={{ y: -2 }}
+              href="/privacy"
+              className="footer-link"
+            >
+              Datenschutz
+            </motion.a>
+            <motion.a
+              whileHover={{ y: -2 }}
+              href="mailto:nora@sfalter.de"
+              className="footer-link"
+            >
+              Support
+            </motion.a>
+            <motion.a
+              whileHover={{ y: -2 }}
+              href="/legal"
+              className="footer-link"
+            >
+              Impressum
+            </motion.a>
+          </div>
+
+          <div className="copyright">
+            &copy; {new Date().getFullYear()} nora App. Entwickelt für deine
+            Privatsphäre.
+          </div>
+        </div>
       </footer>
     </>
   );
