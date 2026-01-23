@@ -38,10 +38,23 @@ export const metadata: Metadata = {
     siteName: "nora App",
     locale: "de_DE",
     type: "website",
+    // OG-Image hinzufügen
+    images: [
+      {
+        url: "/og-image.png", // Stelle sicher, dass dieses Bild in deinem public-Ordner liegt
+        width: 1200,
+        height: 630,
+        alt: "nora App - Deine Noten im Griff",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "nora | Noten & Schnitt im Griff",
+    description:
+      "Sicherer Überblick über deinen aktuellen Notenschnitt – 100% lokal.",
+    // Twitter Image hinzufügen
+    images: ["/og-image.png"],
   },
 };
 
