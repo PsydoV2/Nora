@@ -26,7 +26,7 @@ const OTP_LENGTH = 6;
 
 export default function AuthScreen() {
   // --- HOOKS & CONTEXT ---
-  const { isAuthenticated, isLoading, signIn } = useSession();
+  // const { isAuthenticated, isLoading, signIn } = useSession();
   const { showToast } = useToast();
   const colorScheme = useColorScheme();
   const colors = StyleVariables[colorScheme ?? "light"];
@@ -59,7 +59,7 @@ export default function AuthScreen() {
 
         if (!result) {
           // Szenario: Kein PIN gesetzt -> Auto-Login
-          await signIn("noraUser");
+          // await signIn("noraUser");
           router.replace("/(auth)/(tabs)");
           showToast("Automatisch angemeldet", "success");
         } else {
@@ -136,7 +136,7 @@ export default function AuthScreen() {
     setIsLoadingSubmit(true);
     try {
       if (codeToVerify === storedPassword) {
-        await signIn("noraUser");
+        // await signIn("noraUser");
         showToast("Willkommen!", "success");
         router.replace("/(auth)/(tabs)");
       } else {
@@ -168,7 +168,7 @@ export default function AuthScreen() {
 
   // --- RENDER HELPERS ---
 
-  if (isLoading || isCheckingStorage) {
+  if (isCheckingStorage) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />

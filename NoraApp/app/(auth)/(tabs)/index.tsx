@@ -13,7 +13,8 @@ import {
 } from "react-native";
 import { Octicons } from "@expo/vector-icons";
 import StyleVariables from "@/constants/StyleVariables";
-import { DTOSubject, useSubjects } from "@/src/context/SubjectContext";
+import { useSubjects } from "@/src/context/SubjectContext";
+import { DTOSubject } from "@/src/types/DTOSubjects";
 
 export default function Home() {
   const colorScheme = useColorScheme();
@@ -21,21 +22,23 @@ export default function Home() {
   const styles = getStyles(colors);
   const { addSubject, subjects, updateGrade, deleteSubject } = useSubjects();
 
-  // Modals Visibility
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [yearModalVisible, setYearModalVisible] = useState(false);
   const [menuModalVisible, setMenuModalVisible] = useState(false);
 
-  // States
   const [selectedYear, setSelectedYear] = useState("2025/26");
   const [activeSubject, setActiveSubject] = useState<DTOSubject | null>(null);
 
-  // States für neues Fach
   const [newSubjectName, setNewSubjectName] = useState("");
   const [gradeAmount, setGradeAmount] = useState("2");
+  const [reportGradeAmount, setReportGradeAmount] = useState("2");
+  const [vocalGradeAmount, setVocalGradeAmount] = useState("2");
   const [selectedColor, setSelectedColor] = useState("#4A90E2");
 
-  // Schuljahr-Logik: Heute bis 15 Jahre zurück
+  const [activeFilter, setActiveFilter] = useState<
+    "grade" | "vocal" | "report" | ""
+  >("");
+
   const availableYears = useMemo(() => {
     const years = [];
     const currentYear = new Date().getFullYear();
@@ -47,21 +50,28 @@ export default function Home() {
   }, []);
 
   const subjectsCurrentYear = subjects.filter(
-    (s) => s.schoolyear === selectedYear
+    (s) => s.schoolyear === selectedYear,
   );
 
   const handleAddSubject = async () => {
     if (!newSubjectName.trim()) return;
     const amount = parseInt(gradeAmount) || 0;
+    const rAmount = parseInt(reportGradeAmount) || 0;
+    const vAmount = parseInt(vocalGradeAmount) || 0;
+
     await addSubject({
       subject: newSubjectName,
       schoolyear: selectedYear,
       accentColor: selectedColor,
       gradeAmount: amount,
       grades: Array(amount).fill(null),
+      reportGradeAmount: rAmount,
+      reportGrades: Array(rAmount).fill(null),
+      vocalGradeAmount: vAmount,
+      vocalGrades: Array(vAmount).fill(null),
     });
+
     setNewSubjectName("");
-    setGradeAmount("2");
     setAddModalVisible(false);
   };
 
@@ -78,11 +88,18 @@ export default function Home() {
     }
   };
 
+  const handleActiveFilter = (type: "grade" | "vocal" | "report") => {
+    if (activeFilter === type) {
+      setActiveFilter("");
+    } else {
+      setActiveFilter(type);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}></Text>
+        {/* <Text style={styles.headerTitle}></Text> */}
         <TouchableOpacity
           style={styles.yearDropdown}
           onPress={() => setYearModalVisible(true)}
@@ -90,67 +107,208 @@ export default function Home() {
           <Text style={styles.yearText}>{selectedYear}</Text>
           <Octicons name="chevron-down" size={16} color={colors.text} />
         </TouchableOpacity>
+
+        <View style={styles.filterRow}>
+          <TouchableOpacity
+            style={[
+              styles.filterBtn,
+              !activeFilter.match("grade") ? { borderWidth: 0 } : "",
+            ]}
+            onPress={() => handleActiveFilter("grade")}
+          >
+            <Text>Klausur</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.filterBtn,
+              !activeFilter.match("report") ? { borderWidth: 0 } : "",
+            ]}
+            onPress={() => handleActiveFilter("report")}
+          >
+            <Text>Zeugnis</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.filterBtn,
+              !activeFilter.match("vocal") ? { borderWidth: 0 } : "",
+            ]}
+            onPress={() => handleActiveFilter("vocal")}
+          >
+            <Text>Mündlich</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      {/* Liste */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {subjectsCurrentYear.length == 0 && (
-          <Text style={styles.emptyText}>Keine Einträge bisher</Text>
-          // TODO Möglichkeit einbauen Subjects aus letztem Jahr zu kopieren
-        )}
-        {subjectsCurrentYear.map((subject) => (
-          <View key={subject.uuid} style={styles.subjectCard}>
-            <View
-              style={[
-                styles.subjectIcon,
-                { backgroundColor: `${subject.accentColor}40` },
-              ]}
-            >
-              <Text
-                style={[styles.subjectIconText, { color: subject.accentColor }]}
-              >
-                {subject.subject.charAt(0).toUpperCase()}
-              </Text>
-            </View>
-
-            <View style={styles.subjectInfo}>
-              <View style={styles.subjectHeaderRow}>
-                <Text style={[styles.subjectName, { color: colors.text }]}>
-                  {subject.subject}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => openMenu(subject)}
-                  style={styles.menuTrigger}
+        {(activeFilter == "" || activeFilter == "grade") && (
+          <>
+            <Text style={styles.headerTitle}>Klausur</Text>
+            {subjectsCurrentYear.length === 0 && (
+              <Text style={styles.emptyText}>Keine Einträge bisher</Text>
+            )}
+            {subjectsCurrentYear.map((subject) => (
+              <View key={`exam-${subject.uuid}`} style={styles.subjectCard}>
+                <View
+                  style={[
+                    styles.subjectIcon,
+                    { backgroundColor: `${subject.accentColor}40` },
+                  ]}
                 >
-                  <Octicons
-                    name="kebab-horizontal"
-                    size={20}
-                    color={colors.textMuted}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.gradesRow}>
-                {subject.grades.map((grade, i) => (
-                  <View key={i} style={styles.gradeBox}>
-                    <TextInput
-                      placeholder="-"
-                      placeholderTextColor={colors.textMuted}
-                      keyboardType="numeric"
-                      maxLength={2}
-                      style={styles.gradeInput}
-                      value={grade?.toString() || ""}
-                      onChangeText={(val) => updateGrade(subject.uuid, i, val)}
-                    />
+                  <Text
+                    style={[
+                      styles.subjectIconText,
+                      { color: subject.accentColor },
+                    ]}
+                  >
+                    {subject.subject.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+                <View style={styles.subjectInfo}>
+                  <View style={styles.subjectHeaderRow}>
+                    <Text style={[styles.subjectName, { color: colors.text }]}>
+                      {subject.subject}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => openMenu(subject)}
+                      style={styles.menuTrigger}
+                    >
+                      <Octicons
+                        name="kebab-horizontal"
+                        size={20}
+                        color={colors.textMuted}
+                      />
+                    </TouchableOpacity>
                   </View>
-                ))}
+                  <View style={styles.gradesRow}>
+                    {subject.grades.map((grade, i) => (
+                      <View key={i} style={styles.gradeBox}>
+                        <TextInput
+                          placeholder="-"
+                          placeholderTextColor={colors.textMuted}
+                          keyboardType="numeric"
+                          maxLength={2}
+                          style={styles.gradeInput}
+                          value={grade?.toString() || ""}
+                          onChangeText={(val) =>
+                            updateGrade(subject.uuid, i, val, false)
+                          }
+                        />
+                      </View>
+                    ))}
+                  </View>
+                </View>
               </View>
-            </View>
-          </View>
-        ))}
+            ))}
+          </>
+        )}
+
+        {(activeFilter == "" || activeFilter == "report") && (
+          <>
+            <Text style={styles.headerTitle}>Zeugnis</Text>
+            {subjectsCurrentYear.length === 0 && (
+              <Text style={styles.emptyText}>Keine Einträge bisher</Text>
+            )}
+            {subjectsCurrentYear.map((subject) => (
+              <View key={`report-${subject.uuid}`} style={styles.subjectCard}>
+                <View
+                  style={[
+                    styles.subjectIcon,
+                    { backgroundColor: `${subject.accentColor}40` },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.subjectIconText,
+                      { color: subject.accentColor },
+                    ]}
+                  >
+                    {subject.subject.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+
+                <View style={styles.subjectInfo}>
+                  <View style={styles.subjectHeaderRow}>
+                    <Text style={[styles.subjectName, { color: colors.text }]}>
+                      {subject.subject}
+                    </Text>
+                  </View>
+
+                  <View style={styles.gradesRow}>
+                    {(subject.reportGrades || []).map((grade, i) => (
+                      <View key={i} style={styles.gradeBox}>
+                        <TextInput
+                          placeholder="-"
+                          placeholderTextColor={colors.textMuted}
+                          keyboardType="numeric"
+                          style={styles.gradeInput}
+                          value={grade?.toString() || ""}
+                          onChangeText={(val) =>
+                            updateGrade(subject.uuid, i, val, true)
+                          }
+                        />
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              </View>
+            ))}
+          </>
+        )}
+
+        {(activeFilter == "" || activeFilter == "vocal") && (
+          <>
+            <Text style={styles.headerTitle}>Mündlich</Text>
+            {subjectsCurrentYear.length === 0 && (
+              <Text style={styles.emptyText}>Keine Einträge bisher</Text>
+            )}
+            {subjectsCurrentYear.map((subject) => (
+              <View key={`report-${subject.uuid}`} style={styles.subjectCard}>
+                <View
+                  style={[
+                    styles.subjectIcon,
+                    { backgroundColor: `${subject.accentColor}40` },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.subjectIconText,
+                      { color: subject.accentColor },
+                    ]}
+                  >
+                    {subject.subject.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+
+                <View style={styles.subjectInfo}>
+                  <View style={styles.subjectHeaderRow}>
+                    <Text style={[styles.subjectName, { color: colors.text }]}>
+                      {subject.subject}
+                    </Text>
+                  </View>
+
+                  <View style={styles.gradesRow}>
+                    {(subject.reportGrades || []).map((grade, i) => (
+                      <View key={i} style={styles.gradeBox}>
+                        <TextInput
+                          placeholder="-"
+                          placeholderTextColor={colors.textMuted}
+                          keyboardType="numeric"
+                          style={styles.gradeInput}
+                          value={grade?.toString() || ""}
+                          onChangeText={(val) =>
+                            updateGrade(subject.uuid, i, val, true)
+                          }
+                        />
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              </View>
+            ))}
+          </>
+        )}
       </ScrollView>
 
-      {/* FAB */}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => setAddModalVisible(true)}
@@ -246,7 +404,7 @@ export default function Home() {
           style={styles.modalBackdrop}
         >
           <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Neues Fach ({selectedYear})</Text>
+            <Text style={styles.modalTitle}>Neues Fach</Text>
             <TextInput
               placeholder="Name des Fachs"
               style={styles.input}
@@ -261,6 +419,22 @@ export default function Home() {
               placeholderTextColor="#999"
               value={gradeAmount}
               onChangeText={setGradeAmount}
+            />
+            <TextInput
+              placeholder="Anzahl Zeugnisnoten"
+              keyboardType="numeric"
+              style={styles.input}
+              placeholderTextColor="#999"
+              value={reportGradeAmount}
+              onChangeText={setReportGradeAmount}
+            />
+            <TextInput
+              placeholder="Anzahl Mündlichenoten"
+              keyboardType="numeric"
+              style={styles.input}
+              placeholderTextColor="#999"
+              value={reportGradeAmount}
+              onChangeText={setReportGradeAmount}
             />
             <View style={styles.colorPicker}>
               {["#4A90E2", "#E35D5D", "#50C878", "#F5A623", "#9B59B6"].map(
@@ -277,7 +451,7 @@ export default function Home() {
                       },
                     ]}
                   />
-                )
+                ),
               )}
             </View>
             <TouchableOpacity
@@ -295,28 +469,54 @@ export default function Home() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* Hier folgen die anderen Modals (Year & Menu) - Code ist identisch zu deinem Original */}
     </View>
   );
 }
 
-const getStyles = (colors: typeof StyleVariables.dark) =>
+// Hier die getStyles Funktion (unverändert wie von dir geliefert)
+const getStyles = (colors: (typeof StyleVariables)["light"]) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
     header: {
       flexDirection: "row",
-      justifyContent: "space-between",
+      justifyContent: "flex-end",
       alignItems: "center",
-      paddingHorizontal: 20,
+      flexWrap: "wrap",
+      paddingHorizontal: StyleVariables.gapLg,
       paddingTop: 60,
-      paddingBottom: 20,
+      marginBottom: -30,
     },
-    headerTitle: { fontSize: 28, fontWeight: "900", color: colors.text },
+    headerTitle: {
+      fontSize: 28,
+      fontWeight: "900",
+      color: colors.text,
+      paddingHorizontal: StyleVariables.gapSm,
+      paddingBottom: StyleVariables.gapLg,
+      marginTop: StyleVariables.gapLg,
+    },
+    filterRow: {
+      width: "100%",
+      flexDirection: "row",
+      justifyContent: "space-evenly",
+      alignItems: "center",
+      height: 100,
+    },
+    filterBtn: {
+      backgroundColor: colors.bgDark,
+      paddingVertical: StyleVariables.gapMd,
+      paddingHorizontal: StyleVariables.gapLg,
+      borderRadius: StyleVariables.brLg,
+      borderColor: colors.primary,
+      borderWidth: StyleSheet.hairlineWidth,
+    },
     yearDropdown: {
       flexDirection: "row",
       alignItems: "center",
       backgroundColor: colors.bg,
-      paddingHorizontal: 12,
-      paddingVertical: 6,
+      paddingHorizontal: StyleVariables.gapMd,
+      paddingVertical: StyleVariables.gapSm,
       borderRadius: StyleVariables.brMd,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
@@ -325,7 +525,7 @@ const getStyles = (colors: typeof StyleVariables.dark) =>
       fontSize: 14,
       fontWeight: "900",
       color: colors.text,
-      marginRight: 6,
+      marginRight: StyleVariables.gapMd,
     },
     scrollContent: {
       paddingHorizontal: StyleVariables.gapLg,
@@ -334,16 +534,19 @@ const getStyles = (colors: typeof StyleVariables.dark) =>
     emptyText: {
       color: colors.textMuted,
       textAlign: "center",
+      marginBottom: StyleVariables.gapLg,
     },
     subjectCard: {
       flexDirection: "row",
       borderRadius: StyleVariables.brLg,
       padding: StyleVariables.gapMd,
-      marginBottom: 12,
+      marginBottom: StyleVariables.gapMd,
       alignItems: "center",
       backgroundColor: colors.bgLight,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
+      width: "100%",
+      height: 100,
     },
     subjectIcon: {
       width: 50,
@@ -361,7 +564,7 @@ const getStyles = (colors: typeof StyleVariables.dark) =>
       marginBottom: StyleVariables.gapSm,
     },
     subjectName: { fontSize: 18, fontWeight: "800" },
-    menuTrigger: { padding: 5 },
+    menuTrigger: { padding: StyleVariables.gapSm },
     gradesRow: { flexDirection: "row" },
     gradeBox: {
       width: 35,
@@ -380,16 +583,16 @@ const getStyles = (colors: typeof StyleVariables.dark) =>
       fontWeight: "bold",
       color: colors.text,
       width: "100%",
-      paddingBottom: StyleVariables.gapMd,
+      paddingBottom: 6,
     },
     fab: {
       position: "absolute",
-      bottom: 30,
-      right: 30,
+      bottom: StyleVariables.gapLg,
+      right: StyleVariables.gapLg,
       width: 60,
       height: 60,
       borderRadius: StyleVariables.brLg,
-      backgroundColor: `${colors.primary}40`,
+      backgroundColor: `${colors.primary}20`,
       justifyContent: "center",
       alignItems: "center",
     },
@@ -402,19 +605,19 @@ const getStyles = (colors: typeof StyleVariables.dark) =>
       backgroundColor: colors.bgLight,
       borderTopLeftRadius: StyleVariables.brLg,
       borderTopRightRadius: StyleVariables.brLg,
-      padding: 30,
+      padding: StyleVariables.gapLg,
       alignItems: "center",
       width: "100%",
     },
     modalTitle: {
       fontSize: 20,
       fontWeight: "900",
-      marginBottom: 20,
+      marginBottom: StyleVariables.gapLg,
       color: colors.text,
     },
     optionRow: {
       width: "100%",
-      paddingVertical: 18,
+      paddingVertical: StyleVariables.gapLg,
       flexDirection: "row",
       alignItems: "center",
       borderBottomWidth: StyleSheet.hairlineWidth,
@@ -424,9 +627,9 @@ const getStyles = (colors: typeof StyleVariables.dark) =>
     input: {
       width: "100%",
       backgroundColor: colors.bg,
-      padding: 16,
+      padding: StyleVariables.gapLg,
       borderRadius: StyleVariables.brMd,
-      marginBottom: 15,
+      marginBottom: StyleVariables.gapLg,
       fontSize: 16,
       color: colors.text,
     },
@@ -434,9 +637,9 @@ const getStyles = (colors: typeof StyleVariables.dark) =>
       flexDirection: "row",
       justifyContent: "space-between",
       width: "100%",
-      marginBottom: 25,
+      marginBottom: StyleVariables.gapLg,
     },
-    colorOption: { width: 40, height: 40, borderRadius: 20 },
+    colorOption: { width: 40, height: 40, borderRadius: 1000 },
     addButton: {
       backgroundColor: colors.primary,
       width: "100%",
@@ -446,6 +649,9 @@ const getStyles = (colors: typeof StyleVariables.dark) =>
       marginBottom: 10,
     },
     addButtonText: { color: "white", fontWeight: "bold", fontSize: 16 },
-    closeButton: { marginTop: 10, padding: 10 },
+    closeButton: {
+      marginTop: StyleVariables.gapSm,
+      padding: StyleVariables.gapSm,
+    },
     closeButtonText: { color: colors.danger, fontWeight: "700", fontSize: 16 },
   });

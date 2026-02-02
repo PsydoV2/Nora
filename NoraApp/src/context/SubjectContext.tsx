@@ -1,14 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-export interface DTOSubject {
-  uuid: string;
-  subject: string;
-  schoolyear: string;
-  accentColor: string;
-  gradeAmount: number;
-  grades: (number | null)[];
-}
+import { DTOSubject } from "../types/DTOSubjects";
 
 interface SubjectContextType {
   subjects: DTOSubject[];
@@ -16,7 +8,8 @@ interface SubjectContextType {
   updateGrade: (
     subjectUuid: string,
     gradeIndex: number,
-    value: string
+    value: string,
+    isReport?: boolean,
   ) => Promise<void>;
   deleteSubject: (uuid: string) => Promise<void>;
   deleteAllData: () => Promise<void>;
@@ -24,7 +17,6 @@ interface SubjectContextType {
 }
 
 const SubjectContext = createContext<SubjectContextType | undefined>(undefined);
-
 const STORAGE_KEY = "@grades_data_v1";
 
 export const SubjectProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -33,7 +25,6 @@ export const SubjectProvider: React.FC<{ children: React.ReactNode }> = ({
   const [subjects, setSubjects] = useState<DTOSubject[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Daten beim Start laden
   useEffect(() => {
     loadData();
   }, []);
@@ -43,7 +34,7 @@ export const SubjectProvider: React.FC<{ children: React.ReactNode }> = ({
       const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
       if (jsonValue != null) setSubjects(JSON.parse(jsonValue));
     } catch (e) {
-      console.error("Fehler beim Laden:", e);
+      console.error(e);
     } finally {
       setLoading(false);
     }
@@ -54,7 +45,7 @@ export const SubjectProvider: React.FC<{ children: React.ReactNode }> = ({
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newList));
       setSubjects(newList);
     } catch (e) {
-      console.error("Fehler beim Speichern:", e);
+      console.error(e);
     }
   };
 
@@ -69,15 +60,22 @@ export const SubjectProvider: React.FC<{ children: React.ReactNode }> = ({
   const updateGrade = async (
     subjectUuid: string,
     gradeIndex: number,
-    value: string
+    value: string,
+    isReport: boolean = false,
   ) => {
     const numericGrade =
       value === "" ? null : parseFloat(value.replace(",", "."));
     const newList = subjects.map((s) => {
       if (s.uuid === subjectUuid) {
-        const newGrades = [...s.grades];
-        newGrades[gradeIndex] = numericGrade;
-        return { ...s, grades: newGrades };
+        if (isReport) {
+          const newReportGrades = [...s.reportGrades];
+          newReportGrades[gradeIndex] = numericGrade;
+          return { ...s, reportGrades: newReportGrades };
+        } else {
+          const newGrades = [...s.grades];
+          newGrades[gradeIndex] = numericGrade;
+          return { ...s, grades: newGrades };
+        }
       }
       return s;
     });
@@ -85,27 +83,12 @@ export const SubjectProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const deleteSubject = async (uuid: string) => {
-    try {
-      // Filtere das Fach aus der aktuellen Liste
-      const newList = subjects.filter((s) => s.uuid !== uuid);
-
-      // Speichere die neue Liste im Storage und aktualisiere den State
-      await saveData(newList);
-    } catch (e) {
-      console.error("Fehler beim Löschen des Fachs:", e);
-    }
+    await saveData(subjects.filter((s) => s.uuid !== uuid));
   };
 
   const deleteAllData = async () => {
-    try {
-      // Entferne den gesamten Key aus dem AsyncStorage
-      await AsyncStorage.removeItem(STORAGE_KEY);
-
-      // Setze den lokalen State zurück auf eine leere Liste
-      setSubjects([]);
-    } catch (e) {
-      console.error("Fehler beim Löschen aller Daten:", e);
-    }
+    await AsyncStorage.removeItem(STORAGE_KEY);
+    setSubjects([]);
   };
 
   return (
@@ -124,12 +107,9 @@ export const SubjectProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-// Custom Hook für einfachen Zugriff
 export const useSubjects = () => {
   const context = useContext(SubjectContext);
   if (!context)
-    throw new Error(
-      "useSubjects muss innerhalb eines SubjectProviders genutzt werden"
-    );
+    throw new Error("useSubjects must be used within a SubjectProvider");
   return context;
 };

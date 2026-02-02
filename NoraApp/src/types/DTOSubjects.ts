@@ -1,8 +1,12 @@
 export interface DTOSubject {
-  uuid: string; // String ist flexibler für echte UUIDs
+  uuid: string;
   subject: string;
   schoolyear: string;
   accentColor: string;
   gradeAmount: number;
-  grades: (number | null)[]; // Erlaubt leere Felder (null), wenn noch keine Note eingetragen ist
+  grades: (number | null)[];
+  reportGradeAmount: number;
+  reportGrades: (number | null)[];
+  vocalGradeAmount: number;
+  vocalGrades: (number | null)[];
 }
