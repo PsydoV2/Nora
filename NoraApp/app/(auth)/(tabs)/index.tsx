@@ -11,10 +11,11 @@ import {
   Platform,
   useColorScheme,
 } from "react-native";
-import { Octicons } from "@expo/vector-icons";
+import { MaterialIcons, Octicons } from "@expo/vector-icons";
 import StyleVariables from "@/constants/StyleVariables";
 import { useSubjects } from "@/src/context/SubjectContext";
 import { DTOSubject } from "@/src/types/DTOSubjects";
+import { BlurView } from "expo-blur";
 
 export default function Home() {
   const colorScheme = useColorScheme();
@@ -30,14 +31,15 @@ export default function Home() {
   const [activeSubject, setActiveSubject] = useState<DTOSubject | null>(null);
 
   const [newSubjectName, setNewSubjectName] = useState("");
-  const [gradeAmount, setGradeAmount] = useState("2");
-  const [reportGradeAmount, setReportGradeAmount] = useState("2");
-  const [vocalGradeAmount, setVocalGradeAmount] = useState("2");
+  const [gradeAmount, setGradeAmount] = useState("");
+  const [reportGradeAmount, setReportGradeAmount] = useState("");
+  const [vocalGradeAmount, setVocalGradeAmount] = useState("");
   const [selectedColor, setSelectedColor] = useState("#4A90E2");
 
   const [activeFilter, setActiveFilter] = useState<
     "grade" | "vocal" | "report" | ""
   >("");
+  const [activeFilterVis, setActiveFilterVis] = useState(false);
 
   const availableYears = useMemo(() => {
     const years = [];
@@ -99,7 +101,20 @@ export default function Home() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        {/* <Text style={styles.headerTitle}></Text> */}
+        {/* <Text style={styles.headerTitle}>nora</Text> */}
+        <TouchableOpacity onPress={() => setActiveFilterVis(!activeFilterVis)}>
+          <Text>
+            {activeFilterVis ? (
+              <MaterialIcons
+                name="filter-list-off"
+                size={24}
+                color={colors.text}
+              />
+            ) : (
+              <MaterialIcons name="filter-list" size={24} color={colors.text} />
+            )}
+          </Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.yearDropdown}
           onPress={() => setYearModalVisible(true)}
@@ -108,33 +123,62 @@ export default function Home() {
           <Octicons name="chevron-down" size={16} color={colors.text} />
         </TouchableOpacity>
 
-        <View style={styles.filterRow}>
+        <View
+          style={[
+            styles.filterRow,
+            activeFilterVis ? { display: "flex" } : { display: "none" },
+          ]}
+        >
           <TouchableOpacity
             style={[
               styles.filterBtn,
-              !activeFilter.match("grade") ? { borderWidth: 0 } : "",
+              !activeFilter.match("grade") ? "" : styles.filterBtnActive,
             ]}
             onPress={() => handleActiveFilter("grade")}
           >
-            <Text>Klausur</Text>
+            <Text
+              style={
+                activeFilter.match("grade")
+                  ? { color: colors.primary }
+                  : { color: colors.text }
+              }
+            >
+              Klausur
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[
               styles.filterBtn,
-              !activeFilter.match("report") ? { borderWidth: 0 } : "",
+              !activeFilter.match("report") ? "" : styles.filterBtnActive,
             ]}
             onPress={() => handleActiveFilter("report")}
           >
-            <Text>Zeugnis</Text>
+            <Text
+              style={
+                activeFilter.match("grade")
+                  ? { color: colors.primary }
+                  : { color: colors.text }
+              }
+            >
+              Zeugnis
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[
               styles.filterBtn,
-              !activeFilter.match("vocal") ? { borderWidth: 0 } : "",
+              !activeFilter.match("vocal") ? "" : styles.filterBtnActive,
             ]}
             onPress={() => handleActiveFilter("vocal")}
           >
-            <Text>Mündlich</Text>
+            <Text
+              style={
+                activeFilter.match("grade")
+                  ? { color: colors.primary }
+                  : { color: colors.text }
+              }
+            >
+              Mündlich
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -142,7 +186,7 @@ export default function Home() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {(activeFilter == "" || activeFilter == "grade") && (
           <>
-            <Text style={styles.headerTitle}>Klausur</Text>
+            <Text style={styles.subjectTitle}>Klausur</Text>
             {subjectsCurrentYear.length === 0 && (
               <Text style={styles.emptyText}>Keine Einträge bisher</Text>
             )}
@@ -204,7 +248,7 @@ export default function Home() {
 
         {(activeFilter == "" || activeFilter == "report") && (
           <>
-            <Text style={styles.headerTitle}>Zeugnis</Text>
+            <Text style={styles.subjectTitle}>Zeugnis</Text>
             {subjectsCurrentYear.length === 0 && (
               <Text style={styles.emptyText}>Keine Einträge bisher</Text>
             )}
@@ -257,7 +301,7 @@ export default function Home() {
 
         {(activeFilter == "" || activeFilter == "vocal") && (
           <>
-            <Text style={styles.headerTitle}>Mündlich</Text>
+            <Text style={styles.subjectTitle}>Mündlich</Text>
             {subjectsCurrentYear.length === 0 && (
               <Text style={styles.emptyText}>Keine Einträge bisher</Text>
             )}
@@ -372,16 +416,21 @@ export default function Home() {
               }}
             >
               <Octicons name="pencil" size={20} color={colors.text} />
-              <Text style={[styles.optionText, { marginLeft: 15 }]}>
+              <Text
+                style={[
+                  styles.optionText,
+                  { marginLeft: StyleVariables.gapLg },
+                ]}
+              >
                 Bearbeiten
               </Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.optionRow} onPress={handleDelete}>
-              <Octicons name="trash" size={20} color={colors.danger} />
+              <Octicons name="trash" size={20} color="red" />
               <Text
                 style={[
                   styles.optionText,
-                  { color: colors.danger, marginLeft: 15 },
+                  { color: "red", marginLeft: StyleVariables.gapLg },
                 ]}
               >
                 Löschen
@@ -399,78 +448,100 @@ export default function Home() {
 
       {/* Modal: Hinzufügen */}
       <Modal visible={addModalVisible} transparent animationType="slide">
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.modalBackdrop}
-        >
-          <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Neues Fach</Text>
-            <TextInput
-              placeholder="Name des Fachs"
-              style={styles.input}
-              placeholderTextColor="#999"
-              value={newSubjectName}
-              onChangeText={setNewSubjectName}
-            />
-            <TextInput
-              placeholder="Anzahl Klausuren"
-              keyboardType="numeric"
-              style={styles.input}
-              placeholderTextColor="#999"
-              value={gradeAmount}
-              onChangeText={setGradeAmount}
-            />
-            <TextInput
-              placeholder="Anzahl Zeugnisnoten"
-              keyboardType="numeric"
-              style={styles.input}
-              placeholderTextColor="#999"
-              value={reportGradeAmount}
-              onChangeText={setReportGradeAmount}
-            />
-            <TextInput
-              placeholder="Anzahl Mündlichenoten"
-              keyboardType="numeric"
-              style={styles.input}
-              placeholderTextColor="#999"
-              value={reportGradeAmount}
-              onChangeText={setReportGradeAmount}
-            />
-            <View style={styles.colorPicker}>
-              {["#4A90E2", "#E35D5D", "#50C878", "#F5A623", "#9B59B6"].map(
-                (c) => (
-                  <TouchableOpacity
-                    key={c}
-                    onPress={() => setSelectedColor(c)}
-                    style={[
-                      styles.colorOption,
-                      {
-                        backgroundColor: c,
-                        borderWidth: selectedColor === c ? 3 : 0,
-                        borderColor: colors.text,
-                      },
-                    ]}
-                  />
-                ),
-              )}
+        <BlurView style={styles.modalBackdrop} intensity={20}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.modalBackdrop}
+          >
+            <View style={styles.modalView}>
+              <Text style={styles.modalTitle}>Neues Fach</Text>
+              <TextInput
+                placeholder="Name des Fachs"
+                style={styles.input}
+                placeholderTextColor={colors.border}
+                value={newSubjectName}
+                onChangeText={setNewSubjectName}
+                maxLength={16}
+              />
+              <TextInput
+                placeholder="Anzahl Klausuren"
+                keyboardType="numeric"
+                style={styles.input}
+                placeholderTextColor={colors.border}
+                value={gradeAmount}
+                onChangeText={setGradeAmount}
+                maxLength={1}
+              />
+              <TextInput
+                placeholder="Anzahl Zeugnisnoten"
+                keyboardType="numeric"
+                style={styles.input}
+                placeholderTextColor={colors.border}
+                value={reportGradeAmount}
+                onChangeText={setReportGradeAmount}
+                maxLength={1}
+              />
+              <TextInput
+                placeholder="Anzahl Mündlichenoten"
+                keyboardType="numeric"
+                style={styles.input}
+                placeholderTextColor={colors.border}
+                value={vocalGradeAmount}
+                onChangeText={setVocalGradeAmount}
+                maxLength={1}
+              />
+              <View style={styles.colorPicker}>
+                {["#4A90E2", "#E35D5D", "#50C878", "#F5A623", "#9B59B6"].map(
+                  (c) => {
+                    const isSelected = selectedColor === c;
+                    return (
+                      <TouchableOpacity
+                        key={c}
+                        onPress={() => setSelectedColor(c)}
+                        activeOpacity={0.8}
+                        style={[
+                          styles.colorOption,
+                          {
+                            justifyContent: "center",
+                            alignItems: "center",
+                            width: 38,
+                            height: 38,
+                            borderRadius: 22,
+                            borderWidth: isSelected ? 2 : 0,
+                            borderColor: c,
+                            backgroundColor: "transparent",
+                          },
+                        ]}
+                      >
+                        <View
+                          style={{
+                            width: isSelected ? 30 : 38,
+                            height: isSelected ? 30 : 38,
+                            borderRadius: 20,
+                            backgroundColor: c,
+                          }}
+                        />
+                      </TouchableOpacity>
+                    );
+                  },
+                )}
+              </View>
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={handleAddSubject}
+              >
+                <Text style={styles.addButtonText}>Hinzufügen</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setAddModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>Abbrechen</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={handleAddSubject}
-            >
-              <Text style={styles.addButtonText}>Hinzufügen</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setAddModalVisible(false)}
-            >
-              <Text style={styles.closeButtonText}>Abbrechen</Text>
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
+          </KeyboardAvoidingView>
+        </BlurView>
       </Modal>
-
-      {/* Hier folgen die anderen Modals (Year & Menu) - Code ist identisch zu deinem Original */}
     </View>
   );
 }
@@ -481,42 +552,43 @@ const getStyles = (colors: (typeof StyleVariables)["light"]) =>
     container: { flex: 1, backgroundColor: colors.bg },
     header: {
       flexDirection: "row",
-      justifyContent: "flex-end",
+      justifyContent: "space-between",
       alignItems: "center",
       flexWrap: "wrap",
       paddingHorizontal: StyleVariables.gapLg,
-      paddingTop: 60,
-      marginBottom: -30,
+      paddingTop: StyleVariables.gapLg * 3,
+      paddingBottom: StyleVariables.gapLg,
     },
     headerTitle: {
-      fontSize: 28,
+      fontSize: 20,
       fontWeight: "900",
-      color: colors.text,
+      color: colors.primary,
       paddingHorizontal: StyleVariables.gapSm,
       paddingBottom: StyleVariables.gapLg,
-      marginTop: StyleVariables.gapLg,
     },
     filterRow: {
       width: "100%",
       flexDirection: "row",
       justifyContent: "space-evenly",
       alignItems: "center",
-      height: 100,
+      paddingTop: StyleVariables.gapLg * 2,
     },
     filterBtn: {
       backgroundColor: colors.bgDark,
       paddingVertical: StyleVariables.gapMd,
       paddingHorizontal: StyleVariables.gapLg,
       borderRadius: StyleVariables.brLg,
-      borderColor: colors.primary,
-      borderWidth: StyleSheet.hairlineWidth,
+    },
+    filterBtnActive: {
+      backgroundColor: `${colors.primary}20`,
+      color: colors.primary,
     },
     yearDropdown: {
       flexDirection: "row",
       alignItems: "center",
       backgroundColor: colors.bg,
       paddingHorizontal: StyleVariables.gapMd,
-      paddingVertical: StyleVariables.gapSm,
+      paddingVertical: StyleVariables.gapMd,
       borderRadius: StyleVariables.brMd,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: colors.border,
@@ -536,11 +608,20 @@ const getStyles = (colors: (typeof StyleVariables)["light"]) =>
       textAlign: "center",
       marginBottom: StyleVariables.gapLg,
     },
+    subjectTitle: {
+      fontSize: 24,
+      fontWeight: "900",
+      color: colors.text,
+      paddingHorizontal: StyleVariables.gapSm,
+      paddingTop: StyleVariables.gapLg,
+      marginBottom: StyleVariables.gapMd,
+    },
     subjectCard: {
       flexDirection: "row",
-      borderRadius: StyleVariables.brLg,
-      padding: StyleVariables.gapMd,
-      marginBottom: StyleVariables.gapMd,
+      borderRadius: StyleVariables.brMd,
+      paddingVertical: StyleVariables.gapMd,
+      paddingHorizontal: StyleVariables.gapLg,
+      marginBottom: StyleVariables.gapLg,
       alignItems: "center",
       backgroundColor: colors.bgLight,
       borderWidth: StyleSheet.hairlineWidth,
@@ -551,7 +632,7 @@ const getStyles = (colors: (typeof StyleVariables)["light"]) =>
     subjectIcon: {
       width: 50,
       height: 50,
-      borderRadius: StyleVariables.brMd,
+      borderRadius: StyleVariables.brSm,
       justifyContent: "center",
       alignItems: "center",
     },
@@ -599,7 +680,7 @@ const getStyles = (colors: (typeof StyleVariables)["light"]) =>
     modalBackdrop: {
       flex: 1,
       justifyContent: "flex-end",
-      backgroundColor: `${"#000000"}20`,
+      backgroundColor: "rgba(0, 0, 0, 0.4)",
     },
     modalView: {
       backgroundColor: colors.bgLight,
@@ -617,16 +698,16 @@ const getStyles = (colors: (typeof StyleVariables)["light"]) =>
     },
     optionRow: {
       width: "100%",
-      paddingVertical: StyleVariables.gapLg,
+      paddingVertical: StyleVariables.gapMd,
+      paddingHorizontal: StyleVariables.gapLg,
       flexDirection: "row",
       alignItems: "center",
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: colors.border,
+      marginBottom: StyleVariables.gapLg,
     },
     optionText: { fontSize: 18, fontWeight: "600", color: colors.text },
     input: {
       width: "100%",
-      backgroundColor: colors.bg,
+      backgroundColor: colors.bgDark,
       padding: StyleVariables.gapLg,
       borderRadius: StyleVariables.brMd,
       marginBottom: StyleVariables.gapLg,
@@ -641,17 +722,22 @@ const getStyles = (colors: (typeof StyleVariables)["light"]) =>
     },
     colorOption: { width: 40, height: 40, borderRadius: 1000 },
     addButton: {
-      backgroundColor: colors.primary,
+      backgroundColor: `${colors.primary}40`,
       width: "100%",
-      padding: 16,
+      paddingVertical: StyleVariables.gapLg,
+      paddingHorizontal: StyleVariables.gapSm,
       borderRadius: StyleVariables.brMd,
       alignItems: "center",
-      marginBottom: 10,
+      marginBottom: StyleVariables.gapMd,
     },
-    addButtonText: { color: "white", fontWeight: "bold", fontSize: 16 },
+    addButtonText: { color: colors.primary, fontWeight: "900", fontSize: 16 },
     closeButton: {
       marginTop: StyleVariables.gapSm,
       padding: StyleVariables.gapSm,
     },
-    closeButtonText: { color: colors.danger, fontWeight: "700", fontSize: 16 },
+    closeButtonText: {
+      color: "red",
+      fontWeight: "700",
+      fontSize: 16,
+    },
   });

@@ -40,7 +40,7 @@ export default function RootLayout() {
     if (loaded) {
       const bg = scheme === "dark" ? Colors.dark.bgDark : Colors.light.bgDark;
       SystemUI.setBackgroundColorAsync(bg).finally(() =>
-        SplashScreen.hideAsync()
+        SplashScreen.hideAsync(),
       );
     }
   }, [loaded, scheme]);
@@ -54,9 +54,13 @@ export default function RootLayout() {
           <ToastProvider>
             <SubjectProvider>
               <ThemeProvider
-                value={scheme === "dark" ? DefaultTheme : DefaultTheme}
+                value={scheme === "dark" ? DarkTheme : DefaultTheme}
               >
-                <StatusBar barStyle={"dark-content"}></StatusBar>
+                <StatusBar
+                  barStyle={
+                    scheme === "dark" ? "light-content" : "dark-content"
+                  }
+                ></StatusBar>
                 <Slot />
               </ThemeProvider>
             </SubjectProvider>

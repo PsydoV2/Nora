@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
-  View,
   Switch,
   StyleSheet,
   Modal,
@@ -14,7 +13,7 @@ import {
   useColorScheme,
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import { Text } from "@/components/Themed";
+import { Text, View } from "@/components/Themed";
 import { useToast } from "@/src/context/ToastProvider";
 import StyleVariables from "@/constants/StyleVariables";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -93,7 +92,7 @@ export default function SettingsScreen() {
 
   const handleKeyPress = (
     e: NativeSyntheticEvent<TextInputKeyPressEventData>,
-    index: number
+    index: number,
   ) => {
     if (e.nativeEvent.key === "Backspace" && otp[index] === "" && index > 0) {
       inputRefs.current[index - 1]?.focus();
@@ -383,6 +382,7 @@ const getStyles = (colors: typeof StyleVariables.light) =>
       width: "100%",
       maxWidth: 350,
       marginBottom: 20,
+      backgroundColor: colors.bgLight,
     },
     otpInput: {
       width: 45,
