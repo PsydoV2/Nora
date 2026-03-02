@@ -1,20 +1,22 @@
 {
   "expo": {
-    "name": "nora",
+    "name": "Nora",
     "slug": "nora",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "nora",
     "userInterfaceStyle": "automatic",
+    "updates": {
+      "url": "https://u.expo.dev/694f3e15-a598-4989-8249-87db93f8b93f"
+    },
+    "runtimeVersion": "1.0.0",
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
