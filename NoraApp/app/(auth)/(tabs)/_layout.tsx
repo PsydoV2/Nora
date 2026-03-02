@@ -1,7 +1,6 @@
 import React from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Link, Tabs } from "expo-router";
-import { Pressable } from "react-native";
 import Colors from "@/constants/StyleVariables";
 import { useColorScheme } from "react-native";
 import Octicons from "@expo/vector-icons/Octicons";

@@ -1,4 +1,3 @@
-import EditScreenInfo from "@/components/EditScreenInfo";
 import { Text, View } from "@/components/Themed";
 
 export default function ModalScreen() {
@@ -14,7 +13,6 @@ export default function ModalScreen() {
       <Text style={{ fontSize: 20, fontWeight: "700", marginBottom: 18 }}>
         Modal Screen
       </Text>
-      <EditScreenInfo path="app/(auth)/modal.tsx"></EditScreenInfo>
     </View>
   );
 }

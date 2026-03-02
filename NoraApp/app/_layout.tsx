@@ -13,7 +13,6 @@ import {
 import { SessionProvider } from "@/src/context/AuthContext";
 import { Slot } from "expo-router";
 import Colors from "@/constants/StyleVariables";
-import { UserProvider } from "@/src/context/UserProvider";
 import { ToastProvider } from "@/src/context/ToastProvider";
 import { SubjectProvider } from "@/src/context/SubjectContext";
 
@@ -49,24 +48,18 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <UserProvider>
-        <SessionProvider>
-          <ToastProvider>
-            <SubjectProvider>
-              <ThemeProvider
-                value={scheme === "dark" ? DarkTheme : DefaultTheme}
-              >
-                <StatusBar
-                  barStyle={
-                    scheme === "dark" ? "light-content" : "dark-content"
-                  }
-                ></StatusBar>
-                <Slot />
-              </ThemeProvider>
-            </SubjectProvider>
-          </ToastProvider>
-        </SessionProvider>
-      </UserProvider>
+      <SessionProvider>
+        <ToastProvider>
+          <SubjectProvider>
+            <ThemeProvider value={scheme === "dark" ? DarkTheme : DefaultTheme}>
+              <StatusBar
+                barStyle={scheme === "dark" ? "light-content" : "dark-content"}
+              ></StatusBar>
+              <Slot />
+            </ThemeProvider>
+          </SubjectProvider>
+        </ToastProvider>
+      </SessionProvider>
     </SafeAreaProvider>
   );
 }
